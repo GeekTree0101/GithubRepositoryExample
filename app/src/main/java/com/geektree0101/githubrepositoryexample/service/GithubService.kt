@@ -7,17 +7,50 @@ import nl.komponents.kovenant.deferred
 import java.lang.Exception
 
 interface GithubServiceLogic {
-    fun getRepositories(since: Int?): Promise<Array<Repository>, Exception>
+    fun getRepositories(since: Int?): Promise<List<Repository>, Exception>
 }
 
 class GithubService: GithubServiceLogic {
 
-    override fun getRepositories(since: Int?): Promise<Array<Repository>, Exception> {
+    override fun getRepositories(since: Int?): Promise<List<Repository>, Exception> {
 
         // TODO: GET https://api.github.com/repositories?since=364
-        val seal = deferred<Array<Repository>, Exception>()
+        val seal = deferred<List<Repository>, Exception>()
 
-        seal.resolve(arrayOf(
+        seal.resolve(listOf(
+            Repository(
+                id = 100,
+                owner = User(
+                    login = "1",
+                    avatarURL = ""
+                ),
+                fullName = "first",
+                description = "desc",
+                private = false,
+                fork = false
+            ),
+            Repository(
+                id = 100,
+                owner = User(
+                    login = "1",
+                    avatarURL = ""
+                ),
+                fullName = "first",
+                description = "desc",
+                private = false,
+                fork = false
+            ),
+            Repository(
+                id = 100,
+                owner = User(
+                    login = "1",
+                    avatarURL = ""
+                ),
+                fullName = "first",
+                description = "desc",
+                private = false,
+                fork = false
+            ),
             Repository(
                 id = 100,
                 owner = User(

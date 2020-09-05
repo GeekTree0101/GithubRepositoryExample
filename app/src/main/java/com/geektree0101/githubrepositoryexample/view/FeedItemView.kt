@@ -1,79 +1,94 @@
 package com.geektree0101.githubrepositoryexample.view
 
-import androidx.compose.Composable
-import androidx.ui.core.Alignment
-import androidx.ui.core.Text
-import androidx.ui.core.dp
-import androidx.ui.core.sp
-import androidx.ui.foundation.shape.corner.RoundedCornerShape
-import androidx.ui.graphics.Color
-import androidx.ui.layout.*
-import androidx.ui.material.surface.Card
-import androidx.ui.text.TextStyle
-import androidx.ui.text.font.FontWeight
+import androidx.compose.foundation.Text
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Card
+import androidx.compose.material.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.ui.tooling.preview.Preview
+import dev.chrisbanes.accompanist.coil.CoilImage
 
 data class FeedItemViewModel(
     val title: String,
     val desc: String,
-    val username: String
+    val username: String,
+    val imageURL: String?
 ) {
 
 }
 
 @Composable
 fun FeedItem(viewModel: FeedItemViewModel) {
-    Padding(16.0.dp) {
-        FlexRow {
-            inflexible {
-                Card(shape = RoundedCornerShape(5.0.dp), color = Color.Gray) {
-                    Container(width = 80.0.dp, height = 80.0.dp) {
-                        // TODO: fetching image
-                    }
-                }
-                WidthSpacer(16.0.dp)
-            }
-            expanded(flex = 1f) {
-                FeedItemContentView(viewModel)
-            }
+    Row(modifier = Modifier.padding(16.dp).heightIn(maxHeight = 100.dp).fillMaxWidth(1.0f)) {
+        Card(
+            shape = RoundedCornerShape(5.dp),
+            modifier = Modifier.preferredSize(100.dp),
+            backgroundColor = Color.LightGray
+        ) {
+            CoilImage(
+                data = viewModel.imageURL ?: "",
+                modifier = Modifier.preferredSize(100.dp)
+            )
         }
+        Spacer(modifier = Modifier.width(16.dp))
+        FeedItemContentView(viewModel)
     }
 }
 
 
 @Composable
 private fun FeedItemContentView(viewModel: FeedItemViewModel) {
-    Container(height = 80.dp, alignment = Alignment.TopLeft) {
-        FlexColumn(mainAxisAlignment = MainAxisAlignment.SpaceBetween) {
-            inflexible {
-                Column {
-                    Text(
-                        text = viewModel.title,
-                        style = TextStyle(
-                            fontSize = 16.0.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    )
-                    HeightSpacer(4.dp)
-                    Text(
-                        text = viewModel.desc,
-                        style = TextStyle(
-                            fontSize = 14.0.sp,
-                            fontWeight = FontWeight.Normal,
-                            color = Color.DarkGray
-                        )
-                    )
-                }
-            }
-            inflexible {
-                Text(
-                    text = viewModel.username,
-                    style = TextStyle(
-                        fontSize = 14.0.sp,
-                        fontWeight = FontWeight.Normal,
-                        color = Color.DarkGray
-                    )
+    Column() {
+        Column() {
+            Text(
+                text = viewModel.title,
+                style = TextStyle(
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
                 )
-            }
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = viewModel.desc,
+                style = TextStyle(
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = Color.DarkGray
+                ),
+                maxLines = 2
+            )
         }
+        Spacer(modifier = Modifier.weight(1.0f))
+        Text(
+            text = viewModel.username,
+            style = TextStyle(
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Normal,
+                color = Color.DarkGray
+            ),
+            maxLines = 1
+        )
+    }
+}
+
+@Preview
+@Composable
+fun FeedItemPreview() {
+    Surface(color = Color.White) {
+        FeedItem(
+            viewModel = FeedItemViewModel(
+                title = "iGoSpy",
+                desc = "Clean Swift spy generator built on Go",
+                username = "Geektree0101",
+                imageURL = "https://avatars3.githubusercontent.com/u/19504988?s=460&u=c653be124a5a2e72f496f49597a899014cc6ac5b&v=4"
+            )
+        )
     }
 }

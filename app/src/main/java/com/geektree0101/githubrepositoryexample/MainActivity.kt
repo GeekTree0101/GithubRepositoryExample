@@ -2,7 +2,7 @@ package com.geektree0101.githubrepositoryexample
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.ui.core.setContent
+import androidx.compose.ui.platform.setContent
 import com.geektree0101.githubrepositoryexample.scene.feed.FeedBuilder
 import com.geektree0101.githubrepositoryexample.scene.feed.FeedViewModel
 import com.geektree0101.githubrepositoryexample.service.GithubService

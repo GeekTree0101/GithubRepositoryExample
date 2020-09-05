@@ -1,7 +1,5 @@
 package com.geektree0101.githubrepositoryexample.scene.feed
 
-import androidx.compose.Model
-import androidx.ui.vectormath64.length
 import com.geektree0101.githubrepositoryexample.service.GithubServiceLogic
 import com.geektree0101.githubrepositoryexample.view.FeedItemViewModel
 
@@ -14,7 +12,7 @@ class FeedViewModel: FeedViewModelLogic {
 
     var since: Int? = null
 
-    override var items: Array<FeedItemViewModel> = emptyArray()
+    override var items: List<FeedItemViewModel> = emptyList()
 
     override var service: GithubServiceLogic? = null
 
@@ -29,9 +27,10 @@ class FeedViewModel: FeedViewModelLogic {
                 FeedItemViewModel(
                     title = it.fullName ?: "unknown",
                     desc = it.description ?: "-",
-                    username = it.owner?.login ?: "unknown"
+                    username = it.owner?.login ?: "unknown",
+                    imageURL = null
                 )
-            }.toTypedArray()
+            }.toList()
         }?.fail {
             // TODO: error handling
         }
@@ -55,9 +54,10 @@ class FeedViewModel: FeedViewModelLogic {
                 FeedItemViewModel(
                     title = it.fullName ?: "unknown",
                     desc = it.description ?: "-",
-                    username = it.owner?.login ?: "unknown"
+                    username = it.owner?.login ?: "unknown",
+                    imageURL = null
                 )
-            }.toTypedArray()
+            }.toList()
         }?.fail {
             // TODO: error handling
         }

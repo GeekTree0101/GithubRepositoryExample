@@ -1,18 +1,21 @@
 package com.geektree0101.githubrepositoryexample.scene.feed
 
-import androidx.compose.Composable
-import androidx.compose.Model
-import androidx.ui.core.Text
-import androidx.ui.core.dp
-import androidx.ui.core.sp
-import androidx.ui.foundation.VerticalScroller
-import androidx.ui.graphics.Color
-import androidx.ui.layout.Column
-import androidx.ui.layout.Padding
-import androidx.ui.material.MaterialTheme
-import androidx.ui.material.surface.Surface
-import androidx.ui.text.TextStyle
-import androidx.ui.text.font.FontWeight
+import androidx.compose.foundation.Text
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Modifier
+import androidx.compose.foundation.lazy.LazyColumnFor
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.material.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.ui.tooling.preview.Preview
+import com.geektree0101.githubrepositoryexample.service.GithubService
 import com.geektree0101.githubrepositoryexample.view.FeedItem
 import com.geektree0101.githubrepositoryexample.view.FeedItemViewModel
 
@@ -22,27 +25,46 @@ interface FeedActionLogic {
     fun next()
 }
 
-@Model
 interface FeedStateLogic {
 
-    var items: Array<FeedItemViewModel>
+    var items: List<FeedItemViewModel>
 }
 
 @Composable
 fun FeedView(action: FeedActionLogic?, state: FeedStateLogic?) {
-
     action?.reload()
 
     MaterialTheme {
         Surface(color = Color.White) {
-            VerticalScroller {
-                // TODO: feed view
-                Column {
-                    (state?.items ?: emptyArray()).forEach {
-                        FeedItem(viewModel = it)
-                    }
+            Column() {
+                LazyColumnFor(
+                    items = state?.items ?: emptyList()
+                ) {
+                    FeedItem(viewModel = it)
+                }
+                TextButton(
+                    onClick = {
+                    action?.next()
+                }) {
+                    Text(
+                        text = "Load more",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth(1.0f)
+                            .padding(8.dp),
+                        fontSize = 18.sp
+                    )
                 }
             }
         }
     }
+}
+
+@Preview
+@Composable
+fun FeedViewPreview() {
+    FeedBuilder()
+        .addService(GithubService())
+        .addViewModel(FeedViewModel())
+        .build()
 }

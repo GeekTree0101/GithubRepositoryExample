@@ -1,7 +1,6 @@
 package com.geektree0101.githubrepositoryexample.scene.feed
 
-import android.view.View
-import androidx.compose.Composable
+import androidx.compose.runtime.Composable
 import com.geektree0101.githubrepositoryexample.service.GithubServiceLogic
 
 class FeedBuilder {
@@ -19,6 +18,7 @@ class FeedBuilder {
         return this
     }
 
+    @Composable
     fun build(): Unit {
         this.viewModel?.service = this.repoService
         return FeedView(action = this.viewModel, state = this.viewModel)
