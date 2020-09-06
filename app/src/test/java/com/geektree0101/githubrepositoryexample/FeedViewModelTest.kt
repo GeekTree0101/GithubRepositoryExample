@@ -1,5 +1,8 @@
 package com.geektree0101.githubrepositoryexample
 
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 import com.geektree0101.githubrepositoryexample.model.Repository
 import com.geektree0101.githubrepositoryexample.model.User
 import com.geektree0101.githubrepositoryexample.scene.feed.FeedViewModel
@@ -9,8 +12,12 @@ import nl.komponents.kovenant.Promise
 import nl.komponents.kovenant.testMode
 import org.junit.Assert
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import java.lang.Exception
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 
 
 class FeedViewModelTest {
@@ -20,8 +27,8 @@ class FeedViewModelTest {
     class GithubServiceSpy: GithubServiceLogic {
 
         var getRepositoriesCalled: Int = 0
-        var getRepositoriesStub: Promise<Array<Repository>, Exception> = Promise.ofSuccess(emptyArray())
-        override fun getRepositories(since: Int?): Promise<Array<Repository>, Exception> {
+        var getRepositoriesStub: Promise<List<Repository>, Exception> = Promise.ofSuccess(emptyList())
+        override fun getRepositories(since: Int?): Promise<List<Repository>, Exception> {
             this.getRepositoriesCalled += 1
             return this.getRepositoriesStub
         }
@@ -30,8 +37,13 @@ class FeedViewModelTest {
     var sut: FeedViewModel = FeedViewModel()
     var service: GithubServiceSpy = GithubServiceSpy()
 
+
+    @Rule
+    @JvmField
+    val instantTaskExecutorRule = InstantTaskExecutorRule()
+
     @Before
-    fun setupKovenant() {
+    fun beforeEach() {
         Kovenant.testMode { error ->
             Assert.fail(error.message)
         }
@@ -45,14 +57,14 @@ class FeedViewModelTest {
     @Test
     fun test_reload() {
         // given
-        this.service.getRepositoriesStub = Promise.ofSuccess(arrayOf(
+        this.service.getRepositoriesStub = Promise.ofSuccess(listOf(
             Repository(
                 id = 100,
                 owner = User(
                     login = "Geektree0101",
-                    avatarURL = "https://dummy/image.jpg"
+                    avatar_url = "https://dummy/image.jpg"
                 ),
-                fullName = "GithubRepositoryExample",
+                name = "GithubRepositoryExample",
                 description = "jetpack compose example",
                 private = false,
                 fork = false
@@ -61,9 +73,9 @@ class FeedViewModelTest {
                 id = 200,
                 owner = User(
                     login = "Geektree0101",
-                    avatarURL = "https://dummy/image.jpg"
+                    avatar_url = "https://dummy/image.jpg"
                 ),
-                fullName = "GithubRepositoryExample",
+                name = "GithubRepositoryExample",
                 description = "jetpack compose example",
                 private = false,
                 fork = false
@@ -78,7 +90,8 @@ class FeedViewModelTest {
         Assert.assertEquals(service.getRepositoriesCalled, 1)
 
         // then: state
-        Assert.assertEquals(this.sut.items.size, 2)
+
+        Assert.assertEquals(this.sut.items.getOrAwaitValue().size, 2)
         Assert.assertEquals(this.sut.since, 2)
     }
 
@@ -86,17 +99,16 @@ class FeedViewModelTest {
     @Test
     fun test_reload_without_items() {
         // given
-        this.service.getRepositoriesStub = Promise.ofSuccess(emptyArray())
+        this.service.getRepositoriesStub = Promise.ofSuccess(emptyList())
 
         // when
         this.sut.reload()
-
 
         // then: service
         Assert.assertEquals(service.getRepositoriesCalled, 1)
 
         // then: state
-        Assert.assertEquals(this.sut.items.size, 0)
+        Assert.assertEquals(this.sut.items.getOrAwaitValue().size, 0)
         Assert.assertEquals(this.sut.since, null)
     }
 
@@ -107,14 +119,14 @@ class FeedViewModelTest {
         // given
         this.sut.since = 100
 
-        this.service.getRepositoriesStub = Promise.ofSuccess(arrayOf(
+        this.service.getRepositoriesStub = Promise.ofSuccess(listOf(
             Repository(
                 id = 100,
                 owner = User(
                     login = "Geektree0101",
-                    avatarURL = "https://dummy/image.jpg"
+                    avatar_url = "https://dummy/image.jpg"
                 ),
-                fullName = "GithubRepositoryExample",
+                name = "GithubRepositoryExample",
                 description = "jetpack compose example",
                 private = false,
                 fork = false
@@ -123,9 +135,9 @@ class FeedViewModelTest {
                 id = 200,
                 owner = User(
                     login = "Geektree0101",
-                    avatarURL = "https://dummy/image.jpg"
+                    avatar_url = "https://dummy/image.jpg"
                 ),
-                fullName = "GithubRepositoryExample",
+                name = "GithubRepositoryExample",
                 description = "jetpack compose example",
                 private = false,
                 fork = false
@@ -145,7 +157,7 @@ class FeedViewModelTest {
         // given
         this.sut.since = 100
 
-        this.service.getRepositoriesStub = Promise.ofSuccess(emptyArray())
+        this.service.getRepositoriesStub = Promise.ofSuccess(emptyList())
 
         // when
         this.sut.next()
@@ -160,7 +172,7 @@ class FeedViewModelTest {
         // given
         this.sut.since = null
 
-        this.service.getRepositoriesStub = Promise.ofSuccess(emptyArray())
+        this.service.getRepositoriesStub = Promise.ofSuccess(emptyList())
 
         // when
         this.sut.next()
@@ -169,4 +181,29 @@ class FeedViewModelTest {
         Assert.assertEquals(this.service.getRepositoriesCalled, 0)
         Assert.assertEquals(this.sut.since, null)
     }
+}
+
+fun <T> LiveData<T>.getOrAwaitValue(
+    time: Long = 2,
+    timeUnit: TimeUnit = TimeUnit.SECONDS
+): T {
+    var data: T? = null
+    val latch = CountDownLatch(1)
+    val observer = object : Observer<T> {
+        override fun onChanged(o: T?) {
+            data = o
+            latch.countDown()
+            this@getOrAwaitValue.removeObserver(this)
+        }
+    }
+
+    this.observeForever(observer)
+
+    // Don't wait indefinitely if the LiveData is not set.
+    if (!latch.await(time, timeUnit)) {
+        throw TimeoutException("LiveData value was never set.")
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    return data as T
 }
