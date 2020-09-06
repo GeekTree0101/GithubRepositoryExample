@@ -14,12 +14,18 @@ class FeedViewModel: FeedViewModelLogic {
     var since: Int? = null
 
     override var items: MutableLiveData<List<FeedItemViewModel>> = MutableLiveData()
+    override var isLoading: MutableLiveData<Boolean> = MutableLiveData()
 
     override var service: GithubServiceLogic? = null
 
     override fun reload() {
 
+        this.isLoading.postValue(true)
+
         this.service?.getRepositories(since = null)?.success {
+
+            this.isLoading.postValue(false)
+
             if (it.isNotEmpty()) {
                 this.since = it.size
             }
@@ -40,7 +46,11 @@ class FeedViewModel: FeedViewModelLogic {
             return
         }
 
+        this.isLoading.postValue(true)
+
         this.service?.getRepositories(since = this.since)?.success {
+
+            this.isLoading.postValue(false)
 
             if (it.isNotEmpty()) {
                 this.since = it.size + (this.since ?: 0)

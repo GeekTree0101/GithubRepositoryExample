@@ -1,15 +1,18 @@
 package com.geektree0101.githubrepositoryexample.view
 
+import androidx.compose.foundation.Box
 import androidx.compose.foundation.Text
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.ui.tooling.preview.Preview
@@ -24,61 +27,87 @@ data class FeedItemViewModel(
 ) {
 
     constructor(repository: Repository): this(
-        title = repository.fullName ?: "unknown",
+        title = repository.name ?: "unknown",
         desc = repository.description ?: "-",
         username = repository.owner?.login ?: "unknown",
-        imageURL = repository.owner?.avatarURL
-    ) {
-
-    }
+        imageURL = repository.owner?.avatar_url
+    )
 }
 
 @Composable
 fun FeedItem(viewModel: FeedItemViewModel) {
-    Row(modifier = Modifier.padding(16.dp).heightIn(maxHeight = 100.dp).fillMaxWidth(1.0f)) {
-        Card(
-            shape = RoundedCornerShape(5.dp),
-            modifier = Modifier.preferredSize(100.dp),
-            backgroundColor = Color.LightGray
-        ) {
-            CoilImage(
-                data = viewModel.imageURL ?: "",
-                modifier = Modifier.preferredSize(100.dp)
-            )
-        }
-        Spacer(modifier = Modifier.width(16.dp))
-        FeedItemContentView(viewModel)
+    Column(
+        modifier = Modifier
+            .height(150.dp)
+            .fillMaxWidth(1.0f)
+    ) {
+        FeedContentView(viewModel = viewModel)
+        Spacer(modifier = Modifier.height(8.dp))
+        BottomLineView()
+    }
+}
+
+@Composable
+fun FeedContentView(viewModel: FeedItemViewModel) {
+    Column(
+        modifier = Modifier.padding(16.dp)
+    ) {
+        GithubInfoView(viewModel = viewModel)
+        Spacer(modifier = Modifier.weight(1.0f))
+        ProfileInfoView(viewModel = viewModel)
     }
 }
 
 
 @Composable
-private fun FeedItemContentView(viewModel: FeedItemViewModel) {
+fun BottomLineView() {
+    Box(
+        modifier = Modifier
+            .height(0.5.dp)
+            .fillMaxWidth(1.0f)
+            .background(color = Color.Gray, shape = CircleShape)
+            .padding(horizontal = 16.dp)
+    )
+}
+
+@Composable
+fun GithubInfoView(viewModel: FeedItemViewModel) {
     Column() {
-        Column() {
-            Text(
-                text = viewModel.title,
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
+        Text(
+            text = viewModel.title,
+            style = TextStyle(
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold
             )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = viewModel.desc,
-                style = TextStyle(
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = Color.DarkGray
-                ),
-                maxLines = 2
-            )
-        }
-        Spacer(modifier = Modifier.weight(1.0f))
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = viewModel.desc,
+            style = TextStyle(
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Normal,
+                color = Color.DarkGray
+            ),
+            maxLines = 2
+        )
+    }
+}
+
+@Composable
+fun ProfileInfoView(viewModel: FeedItemViewModel) {
+    Row(verticalGravity = Alignment.CenterVertically) {
+        CoilImage(
+            data = viewModel.imageURL ?: "",
+            modifier = Modifier
+                .preferredSize(24.dp)
+                .clip(CircleShape)
+                .background(color = Color.LightGray, shape = CircleShape)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = viewModel.username,
             style = TextStyle(
-                fontSize = 16.sp,
+                fontSize = 12.sp,
                 fontWeight = FontWeight.Normal,
                 color = Color.DarkGray
             ),
