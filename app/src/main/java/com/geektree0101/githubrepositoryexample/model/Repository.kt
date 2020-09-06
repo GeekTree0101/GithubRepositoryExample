@@ -7,7 +7,7 @@ import android.os.Parcelable
 data class Repository(
     val id: Int,
     val owner: User?,
-    val fullName: String?,
+    val name: String?,
     val description: String?,
     val private: Boolean,
     val fork: Boolean

@@ -6,7 +6,7 @@ import android.os.Parcelable
 @Parcelize
 data class User(
     val login: String,
-    val avatarURL: String
+    val avatar_url: String
 ) : Parcelable {
 
 }
