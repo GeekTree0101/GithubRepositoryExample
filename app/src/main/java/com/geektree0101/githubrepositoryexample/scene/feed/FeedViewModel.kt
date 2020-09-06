@@ -1,5 +1,6 @@
 package com.geektree0101.githubrepositoryexample.scene.feed
 
+import androidx.lifecycle.MutableLiveData
 import com.geektree0101.githubrepositoryexample.service.GithubServiceLogic
 import com.geektree0101.githubrepositoryexample.view.FeedItemViewModel
 
@@ -12,7 +13,7 @@ class FeedViewModel: FeedViewModelLogic {
 
     var since: Int? = null
 
-    override var items: List<FeedItemViewModel> = emptyList()
+    override var items: MutableLiveData<List<FeedItemViewModel>> = MutableLiveData()
 
     override var service: GithubServiceLogic? = null
 
@@ -23,14 +24,16 @@ class FeedViewModel: FeedViewModelLogic {
                 this.since = it.size
             }
 
-            this.items = it.map {
-                FeedItemViewModel(
-                    title = it.fullName ?: "unknown",
-                    desc = it.description ?: "-",
-                    username = it.owner?.login ?: "unknown",
-                    imageURL = null
-                )
-            }.toList()
+            this.items.postValue(
+                it.map {
+                    FeedItemViewModel(
+                        title = it.fullName ?: "unknown",
+                        desc = it.description ?: "-",
+                        username = it.owner?.login ?: "unknown",
+                        imageURL = null
+                    )
+                }.toList()
+            )
         }?.fail {
             // TODO: error handling
         }
@@ -50,7 +53,8 @@ class FeedViewModel: FeedViewModelLogic {
                 this.since = null
             }
 
-            this.items += it.map {
+            var updateItems = this.items.value ?: emptyList()
+            updateItems += it.map {
                 FeedItemViewModel(
                     title = it.fullName ?: "unknown",
                     desc = it.description ?: "-",
@@ -58,6 +62,8 @@ class FeedViewModel: FeedViewModelLogic {
                     imageURL = null
                 )
             }.toList()
+
+            this.items.postValue(updateItems)
         }?.fail {
             // TODO: error handling
         }
