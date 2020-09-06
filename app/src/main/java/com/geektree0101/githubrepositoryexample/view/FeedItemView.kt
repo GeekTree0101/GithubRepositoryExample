@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.ui.tooling.preview.Preview
+import com.geektree0101.githubrepositoryexample.model.Repository
 import dev.chrisbanes.accompanist.coil.CoilImage
 
 data class FeedItemViewModel(
@@ -22,6 +23,14 @@ data class FeedItemViewModel(
     val imageURL: String?
 ) {
 
+    constructor(repository: Repository): this(
+        title = repository.fullName ?: "unknown",
+        desc = repository.description ?: "-",
+        username = repository.owner?.login ?: "unknown",
+        imageURL = repository.owner?.avatarURL
+    ) {
+
+    }
 }
 
 @Composable

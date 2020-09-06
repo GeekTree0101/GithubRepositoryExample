@@ -26,12 +26,7 @@ class FeedViewModel: FeedViewModelLogic {
 
             this.items.postValue(
                 it.map {
-                    FeedItemViewModel(
-                        title = it.fullName ?: "unknown",
-                        desc = it.description ?: "-",
-                        username = it.owner?.login ?: "unknown",
-                        imageURL = null
-                    )
+                    FeedItemViewModel(repository = it)
                 }.toList()
             )
         }?.fail {
@@ -55,12 +50,7 @@ class FeedViewModel: FeedViewModelLogic {
 
             var updateItems = this.items.value ?: emptyList()
             updateItems += it.map {
-                FeedItemViewModel(
-                    title = it.fullName ?: "unknown",
-                    desc = it.description ?: "-",
-                    username = it.owner?.login ?: "unknown",
-                    imageURL = null
-                )
+                FeedItemViewModel(repository = it)
             }.toList()
 
             this.items.postValue(updateItems)
